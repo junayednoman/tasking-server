@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
   res.send("Server is running")
 })
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.r8yk5up.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -28,6 +28,7 @@ async function run() {
   try {
     // database collections
     const taskCollection = client.db("Tasking").collection("tasks");
+    const userCollection = client.db("Tasking").collection("users");
     // api for posting tasks on db
     app.post('/tasks', async (req, res) => {
       const taskData = req.body;
@@ -35,10 +36,35 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/my-tasks', async (req, res) => {
-      const result = await taskCollection.find().toArray();
+    app.get('/tasks/:email', async (req, res) => {
+      const query = { userEmail: req.params.email }
+      const result = await taskCollection.find(query).toArray();
       res.send(result);
     })
+
+    app.get('/taskss/:email/:id', async (req, res) => {
+      const query = { _id: new ObjectId(req.params.id), userEmail: req.params.email }
+      const result = await taskCollection.findOne(query);
+      console.log(req.params.email);
+      res.send(result)
+      console.log(req.params.id);
+    })
+
+    
+
+    // ap for posting users data to DB
+    app.post('/users', async (req, res) => {
+      const userData = req.body;
+      const query = { email: userData.email }
+      const isExist = await userCollection.findOne(query);
+      if (isExist) {
+        return res.send({ message: "This user is already exist in DB", insertedID: null })
+      }
+      const result = await userCollection.insertOne(userData);
+      res.send(result);
+    })
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
