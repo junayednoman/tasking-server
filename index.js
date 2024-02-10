@@ -42,15 +42,18 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/taskss/:email/:id', async (req, res) => {
+    app.get('/tasks/:email/:id', async (req, res) => {
       const query = { _id: new ObjectId(req.params.id), userEmail: req.params.email }
       const result = await taskCollection.findOne(query);
-      console.log(req.params.email);
       res.send(result)
-      console.log(req.params.id);
     })
 
-    
+    // api for deleting tasks
+    app.delete('/tasks/:email/:id', async (req, res) => {
+      const query = { userEmail: req.params.email, _id: new ObjectId(req.params.id) };
+      const result = await taskCollection.deleteOne(query);
+      res.send(result);
+    })
 
     // ap for posting users data to DB
     app.post('/users', async (req, res) => {
