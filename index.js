@@ -55,6 +55,17 @@ async function run() {
       res.send(result);
     })
 
+    // api for updating task status
+    app.patch('/tasks/:email/:id', async (req, res) => {
+      const query = { userEmail: req.params.email, _id: new ObjectId(req.params.id) };
+      const updates = req.body;
+      const updateDoc = {
+        $set: updates
+      }
+      const result = await taskCollection.updateOne(query, updateDoc);
+      res.send(result);
+    })
+
     // ap for posting users data to DB
     app.post('/users', async (req, res) => {
       const userData = req.body;
